@@ -50,7 +50,9 @@
                 :compiler {:output-to "resources/public/js/compiled/tilemapgl.js"
                            :main tilemapgl.core
                            :optimizations :advanced
-                           :pretty-print false}}]}
+                           :pretty-print false
+                           :externs ["externs/w3c_audio.js" "externs/w3c_gamepad.js" "externs/pixi.ext.js"]
+                           }}]}
 
   :figwheel {;; :http-server-root "public" ;; default and assumes "resources"
              ;; :server-port 3449 ;; default
