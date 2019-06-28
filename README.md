@@ -1,10 +1,12 @@
 # tilemapgl
 
-FIXME: Write a one-line description of your library/project.
+WIP: build a high speed retro tilemap game engine based on a sole fragment shader
+
+[TRY IT NOW!](https://retrogradeorbit.github.io/tilemapgl/)
 
 ## Overview
 
-FIXME: Write a paragraph about the library/project and highlight its goals.
+Make a super fast, super large tilemap, rendered soley on the GPU.
 
 ## Setup
 
@@ -30,7 +32,7 @@ To create a production build run:
     lein do clean, cljsbuild once min
 
 And open your browser in `resources/public/index.html`. You will not
-get live reloading, nor a REPL. 
+get live reloading, nor a REPL.
 
 ## License
 
