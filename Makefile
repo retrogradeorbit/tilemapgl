@@ -70,4 +70,4 @@ create-initial-build-folder:
 checkouts:
 	mkdir checkouts
 	cd checkouts/ && ln -s ../../infinitelives.pixi
-cd checkouts/ && ln -s ../../infinitelives.utils
+	cd checkouts/ && ln -s ../../infinitelives.utils
