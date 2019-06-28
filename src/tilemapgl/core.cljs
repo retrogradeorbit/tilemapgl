@@ -40,7 +40,7 @@
            :translate {:stats [40 -40]
                        :title [0 40]}}))
 
-(s/set-default-scale! 1)
+(s/set-default-scale! 2)
 
 (defonce main
   (go
@@ -48,7 +48,8 @@
 
     (c/with-sprite canvas :tilemap
       [tiles (s/make-sprite (r/get-texture :tiles :nearest))]
-      (<! (timeout 10000))
+      (while true
+        (<! (timeout 1000)))
       )
 
     ))
