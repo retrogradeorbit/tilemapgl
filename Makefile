@@ -65,7 +65,7 @@ create-initial-build-folder:
 	@echo "now make release build into build/, cd into build and:"
 	@echo "git add ."
 	@echo "git commit -a -m 'First release'"
-	@echo "git push origin gh-pages"
+	@echo "git push -u origin gh-pages"
 
 checkouts:
 	mkdir checkouts
