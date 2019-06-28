@@ -1,12 +1,12 @@
 # tilemapgl
 
-WIP: build a high speed retro tilemap game engine based on a sole fragment shader
+WIP: build a high speed retro tilemap game engine in clojurescripte based on a sole fragment shader
 
 [TRY IT NOW!](https://retrogradeorbit.github.io/tilemapgl/)
 
 ## Overview
 
-Make a super fast, super large tilemap, rendered soley on the GPU.
+Make a super fast, super large tilemap, rendered soley on the GPU. Intended for use with infinitelives and to be used in gamejams.
 
 ## Setup
 
