@@ -42,14 +42,56 @@
 
 (s/set-default-scale! 2)
 
+(def fragment-shader
+  "
+  precision mediump float;
+
+  uniform float time;
+
+  void main() {
+    gl_FragColor = vec4(0.4,0.3,0.3,1.0);
+  }
+")
+
+(defn make-shader []
+  (let [shader (js/PIXI.Filter.
+                nil
+                fragment-shader)]
+    (set! (.-uniforms.time shader) 1.0)
+    shader))
+
+(defn make-background []
+  (let [bg (js/PIXI.Graphics.)
+        border-colour 0x000000
+        width 32
+        height 32
+        full-colour 0xff0000
+        ]
+    (doto bg
+      (.beginFill 0xff0000)
+      (.lineStyle 0 border-colour)
+      (.drawRect 0 0 width height)
+      (.lineStyle 0 border-colour)
+      (.beginFill full-colour)
+      (.drawRect 0 0 64 64)
+      .endFill)
+    #_ (.generateTexture bg false)))
+
+(defn set-texture-filter [texture filter]
+  (set! (.-filters texture) (make-array filter)))
+
 (defonce main
   (go
     (<! (r/load-resources canvas :ui ["img/tiles.png"]))
 
-    (c/with-sprite canvas :tilemap
-      [tiles (s/make-sprite (r/get-texture :tiles :nearest))]
-      (while true
-        (<! (timeout 1000)))
-      )
+    (let [shader (make-shader)]
+      (c/with-sprite canvas :tilemap
+        [tiles (s/make-sprite (r/get-texture :tiles :nearest))
+         bg (make-background) #_(s/make-sprite (make-background) :scale 1)
+         ]
+        (set-texture-filter bg shader)
+
+        (<! (timeout 10000))
+        ))
 
     ))
