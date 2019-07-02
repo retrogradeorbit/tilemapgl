@@ -97,8 +97,7 @@
       (.lineStyle 0 border-colour)
       (.beginFill full-colour)
       (.drawRect 0 0 512 512)
-      .endFill)
-    #_ (.generateTexture bg false)))
+      .endFill)))
 
 (defn print-gl-version []
   (when-let [gl (.getContext (:canvas canvas) "webgl2")]
@@ -116,12 +115,9 @@
     (let [shader (make-shader)]
       (c/with-sprite canvas :tilemap
         [;;tiles (s/make-sprite (r/get-texture :tiles :nearest))
-         bg (make-background) #_(s/make-sprite (make-background) :scale 1)
+         bg (make-background)
          ]
         (set-texture-filter bg shader)
 
         (while true
-          (<! (timeout 1000)))
-        ))
-
-    ))
+          (<! (timeout 1000)))))))
