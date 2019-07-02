@@ -5,21 +5,6 @@
             [cljs.core.async :refer [chan close! >! <! timeout]])
   (:require-macros [cljs.core.async.macros :refer [go]]))
 
-(enable-console-print!)
-
-(println "This text is printed from src/tilemapgl/core.cljs. Go ahead and edit it and see reloading in action.")
-
-;; define your app data so that it doesn't get over-written on reload
-
-(defonce app-state (atom {:text "Hello world!"}))
-
-
-(defn on-js-reload []
-  ;; optionally touch your app-state to force rerendering depending on
-  ;; your application
-  ;; (swap! app-state update-in [:__figwheel_counter] inc)
-)
-
 (defonce bg-colour 0x202000)
 
 (defonce canvas
@@ -30,8 +15,6 @@
                      :title :top}
            :translate {:stats [40 -40]
                        :title [0 40]}}))
-
-(s/set-default-scale! 1)
 
 (def fragment-shader
   "
