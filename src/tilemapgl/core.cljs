@@ -1,18 +1,9 @@
 (ns tilemapgl.core
   (:require [infinitelives.pixi.resources :as r]
-            [infinitelives.pixi.texture :as t]
             [infinitelives.pixi.canvas :as c]
             [infinitelives.pixi.sprite :as s]
-            [infinitelives.pixi.pixelfont :as pf]
-            [infinitelives.utils.events :as e]
-            [infinitelives.utils.gamepad :as gp]
-            [infinitelives.utils.vec2 :as vec2]
-            [infinitelives.utils.console :refer [log]]
-            [cljs.core.match :refer-macros [match]]
-            [clojure.string :as string]
             [cljs.core.async :refer [chan close! >! <! timeout]])
-  (:require-macros [cljs.core.async.macros :refer [go]])
-  )
+  (:require-macros [cljs.core.async.macros :refer [go]]))
 
 (enable-console-print!)
 
@@ -79,13 +70,16 @@
   }
 ")
 
+(defn set-uniform [filter name value]
+  (aset (.-uniforms filter) name value))
+
 (defn make-shader []
   (let [shader (js/PIXI.Filter.
                 nil
                 fragment-shader)]
-    (set! (.-uniforms.time shader) 1.0)
-    (set! (.-uniforms.map shader) (r/get-texture :map :nearest))
-    (set! (.-uniforms.tiles shader) (r/get-texture :tiles :nearest))
+    (set-uniform shader "time" 1.0)
+    (set-uniform shader "map" (r/get-texture :map :nearest))
+    (set-uniform shader "tiles" (r/get-texture :tiles :nearest))
 
     shader))
 
