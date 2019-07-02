@@ -49,7 +49,7 @@
                 :source-paths ["src"]
                 :compiler {:output-to "build/js/compiled/tilemapgl.js"
                            :main tilemapgl.core
-                           :optimizations :advanced
+                           :optimizations :whitespace
                            :pretty-print false
                            :externs ["externs/w3c_audio.js" "externs/w3c_gamepad.js" "externs/pixi.ext.js"]
                            }}]}
