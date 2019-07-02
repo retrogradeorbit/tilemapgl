@@ -40,16 +40,42 @@
            :translate {:stats [40 -40]
                        :title [0 40]}}))
 
-(s/set-default-scale! 2)
+(s/set-default-scale! 1)
 
 (def fragment-shader
   "
-  precision mediump float;
 
-  uniform float time;
+  uniform sampler2D map;
+  uniform sampler2D tiles;
+
+  varying vec2 vTextureCoord;
 
   void main() {
-    gl_FragColor = vec4(0.4,0.3,0.3,1.0);
+    vec2 fragpixelpos = vTextureCoord*512.;
+    vec2 tilepixelpos = vTextureCoord*32.;
+    vec4 tile = texture2D(map, tilepixelpos/64.);
+
+    // tile location on sprite sheet
+    float x = (tile.x * 256.0);
+    float y = (tile.y * 256.0);
+    float a = tile.a;
+
+    // tile pixel location on sprite sheet
+    float tilexpixelpos = x * 32.;
+    float tileypixelpos = y * 32.;
+
+    float ipx = mod(fragpixelpos.x, 32.0);
+    float ipy = mod(fragpixelpos.y, 32.0);
+
+    vec2 finalpixelpos = vec2( (tilexpixelpos + ipx),
+                               (tileypixelpos + ipy));
+
+
+    vec4 final = texture2D(tiles, vec2(finalpixelpos.x/448.,
+                                         finalpixelpos.y/320.));
+
+    gl_FragColor = (a == 0.0?vec4(0.,0.,0.,0.):final);
+    // vec4(0.9,0.3,0.3,1.0);
   }
 ")
 
@@ -58,6 +84,9 @@
                 nil
                 fragment-shader)]
     (set! (.-uniforms.time shader) 1.0)
+    (set! (.-uniforms.map shader) (r/get-texture :map :nearest))
+    (set! (.-uniforms.tiles shader) (r/get-texture :tiles :nearest))
+
     shader))
 
 (defn make-background []
@@ -73,25 +102,32 @@
       (.drawRect 0 0 width height)
       (.lineStyle 0 border-colour)
       (.beginFill full-colour)
-      (.drawRect 0 0 64 64)
+      (.drawRect 0 0 512 512)
       .endFill)
     #_ (.generateTexture bg false)))
+
+(defn print-gl-version []
+  (when-let [gl (.getContext (:canvas canvas) "webgl2")]
+    (js/console.log (.getParameter gl (.-SHADING_LANGUAGE_VERSION gl)))))
 
 (defn set-texture-filter [texture filter]
   (set! (.-filters texture) (make-array filter)))
 
 (defonce main
   (go
-    (<! (r/load-resources canvas :ui ["img/tiles.png"]))
+    (print-gl-version)
+
+    (<! (r/load-resources canvas :ui ["img/tiles.png" "img/map.png"]))
 
     (let [shader (make-shader)]
       (c/with-sprite canvas :tilemap
-        [tiles (s/make-sprite (r/get-texture :tiles :nearest))
+        [;;tiles (s/make-sprite (r/get-texture :tiles :nearest))
          bg (make-background) #_(s/make-sprite (make-background) :scale 1)
          ]
         (set-texture-filter bg shader)
 
-        (<! (timeout 10000))
+        (while true
+          (<! (timeout 1000)))
         ))
 
     ))
