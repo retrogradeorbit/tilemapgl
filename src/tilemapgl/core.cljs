@@ -16,6 +16,21 @@
            :translate {:stats [40 -40]
                        :title [0 40]}}))
 
+(def vertex-shader
+  "
+  attribute vec2 aVertexPosition;
+  attribute vec2 aTextureCoord;
+
+  uniform mat3 projectionMatrix;
+
+  varying vec2 vTextureCoord;
+
+  void main(void){
+     gl_Position = vec4((projectionMatrix * vec3(aVertexPosition, 1.0)).xy, 0.0, 1.0);
+     vTextureCoord = aTextureCoord;
+  }"
+  )
+
 (def fragment-shader
   "
 
@@ -30,13 +45,13 @@
     vec4 tile = texture2D(map, tilepixelpos/64.);
 
     // tile location on sprite sheet
-    float x = (tile.x * 256.0);
-    float y = (tile.y * 256.0);
+    float x = (tile.x * 255.0);
+    float y = (tile.y * 255.0);
     float a = tile.a;
 
     // tile pixel location on sprite sheet
-    float tilexpixelpos = x * 32.;
-    float tileypixelpos = y * 32.;
+    float tilexpixelpos = (x * 32.);
+    float tileypixelpos = (y * 32.);
 
     float ipx = mod(fragpixelpos.x, 32.0);
     float ipy = mod(fragpixelpos.y, 32.0);
@@ -58,7 +73,7 @@
 
 (defn make-shader []
   (let [shader (js/PIXI.Filter.
-                nil
+                vertex-shader
                 fragment-shader)]
     (set-uniform shader "time" 1.0)
     (set-uniform shader "map" (r/get-texture :map :nearest))
@@ -66,7 +81,7 @@
 
     shader))
 
-(defn make-background []
+(defn make-backg []
   (let [bg (js/PIXI.Graphics.)
         border-colour 0x000000
         width 32
@@ -98,7 +113,7 @@
     (let [shader (make-shader)]
       (c/with-sprite canvas :tilemap
         [;;tiles (s/make-sprite (r/get-texture :tiles :nearest))
-         bg (make-background)
+         bg (make-backg)
          ]
         (set-texture-filter bg shader)
 
