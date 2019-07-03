@@ -17,13 +17,13 @@
                        :title [0 40]}}))
 
 (def vertex-shader
-  "
-  attribute vec2 aVertexPosition;
-  attribute vec2 aTextureCoord;
+  "#version 300 es
+  in vec2 aVertexPosition;
+  in vec2 aTextureCoord;
 
   uniform mat3 projectionMatrix;
 
-  varying vec2 vTextureCoord;
+  out vec2 vTextureCoord;
 
   void main(void){
      gl_Position = vec4((projectionMatrix * vec3(aVertexPosition, 1.0)).xy, 0.0, 1.0);
@@ -32,17 +32,20 @@
   )
 
 (def fragment-shader
-  "
+  "#version 300 es
+  precision mediump float;
 
   uniform sampler2D map;
   uniform sampler2D tiles;
 
-  varying vec2 vTextureCoord;
+  in vec2 vTextureCoord;
+
+  out vec4 diffuseColor;
 
   void main() {
     vec2 fragpixelpos = vTextureCoord*512.;
     vec2 tilepixelpos = vTextureCoord*32.;
-    vec4 tile = texture2D(map, tilepixelpos/64.);
+    vec4 tile = texture(map, tilepixelpos/64.);
 
     // tile location on sprite sheet
     float x = (tile.x * 255.0);
@@ -60,11 +63,10 @@
                                (tileypixelpos + ipy));
 
 
-    vec4 final = texture2D(tiles, vec2(finalpixelpos.x/448.,
+    vec4 final = texture(tiles, vec2(finalpixelpos.x/448.,
                                          finalpixelpos.y/320.));
 
-    gl_FragColor = (a == 0.0?vec4(0.,0.,0.,0.):final);
-    // vec4(0.9,0.3,0.3,1.0);
+    diffuseColor = (a == 0.0?vec4(0.,0.,0.,0.):final);
   }
 ")
 
