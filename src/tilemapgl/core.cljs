@@ -18,7 +18,7 @@
                        :title [0 40]}}))
 
 (def fragment-shader
-  "precision mediump float;
+  "precision highp float;
 
   uniform sampler2D map;
   uniform sampler2D tiles;
@@ -159,8 +159,8 @@
         (loop [t 0]
           (set-uniform shader "scroll" (clj->js
                                         [
-                                         (int (* 16000 (+ 0.5 (/ (Math/sin (* 2 0.00128 t)) 2))))
-                                         (int (* 16000 (+ 0.5 (/ (Math/sin (* 2 0.0006 t)) 2))))
+                                         (int (* 16000 (+ 0.5 (/ (Math/sin (* 1.5 0.00128 t)) 2))))
+                                         (int (* 16000 (+ 0.5 (/ (Math/sin (* 1.5 0.0006 t)) 2))))
                                          ]))
           (set-uniform shader "fragsize" #js [(.-innerWidth js/window)
                                               (.-innerHeight js/window)])
