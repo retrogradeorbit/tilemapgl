@@ -2,6 +2,7 @@
   (:require [infinitelives.pixi.resources :as r]
             [infinitelives.pixi.canvas :as c]
             [infinitelives.pixi.sprite :as s]
+            [infinitelives.utils.events :as e]
             [cljs.core.async :refer [chan close! >! <! timeout]])
   (:require-macros [cljs.core.async.macros :refer [go]]))
 
@@ -27,6 +28,7 @@
 
   void main(void){
      gl_Position = vec4((projectionMatrix * vec3(aVertexPosition, 1.0)).xy, 0.0, 1.0);
+     //gl_Position = vec4(aVertexPosition, 0.0, 1.0);
 
      vTextureCoord = aTextureCoord;
   }"
@@ -34,36 +36,35 @@
 
 (def fragment-shader
   "#version 300 es
-  precision highp float;
+  precision mediump float;
 
   uniform sampler2D map;
   uniform sampler2D tiles;
-  uniform ivec2 fragsize;
-  uniform ivec2 tilesize;
+  uniform vec2 scroll;
+  uniform vec2 fragsize;
+  uniform vec2 tilesize;
+  uniform vec2 mapsize;
+  uniform vec2 tilesheetsize;
 
   in vec2 vTextureCoord;
 
   out vec4 diffuseColor;
 
   void main() {
-    highp ivec2 mapsize = textureSize(map, 0);
-    highp ivec2 tilesheetsize = textureSize(tiles, 0);
+    vec2 fragpixelpos = vTextureCoord*fragsize+scroll;
+    vec2 tilepixelpos = floor(fragpixelpos)/mapsize;
+    vec4 tile = texture(map, tilepixelpos/tilesize);
 
-    vec2 fragpixelpos = vTextureCoord*float(fragsize);
-    vec2 tilepixelpos = floor(fragpixelpos)/float(mapsize);
-    vec4 tile = texture(map, tilepixelpos/float(tilesize));
-
+    // if map pixel has alpha of 0, render nothing
     if(tile.a == 0.0) { discard;}
 
     // tile location on sprite sheet
-    vec2 tileoffset = tile.xy * 255. * float(tilesize);
+    vec2 tileoffset = tile.xy * 255. * tilesize;
 
     // tile pixel location on sprite sheet
-    vec2 innercoord = mod(fragpixelpos, float(tilesize));
+    vec2 innercoord = mod(fragpixelpos, tilesize);
 
-    vec2 finalpixelpos = tileoffset + innercoord;
-    diffuseColor = texture(tiles, vec2(finalpixelpos.x/448.,
-                                       finalpixelpos.y/320.));
+    diffuseColor = texture(tiles,  (tileoffset + innercoord)/tilesheetsize);
   }
 ")
 
@@ -74,8 +75,11 @@
   (let [shader (js/PIXI.Filter.
                 vertex-shader
                 fragment-shader)]
-    (set-uniform shader "time" 1.0)
-    (set-uniform shader "fragsize" #js [1024 1024])
+    (set-uniform shader "mapsize" #js [1024. 1024.])
+    (set-uniform shader "tilesheetsize" #js [448. 320.])
+    (set-uniform shader "fragsize" #js [(.-innerWidth js/window)
+                                        (.-innerHeight js/window)])
+    (set-uniform shader "scroll" #js [-500 -500])
     (set-uniform shader "tilesize" #js [32. 32.])
     (set-uniform shader "map" texture)
     (set-uniform shader "tiles" (r/get-texture :tiles :nearest))
@@ -95,7 +99,7 @@
       (.drawRect 0 0 width height)
       (.lineStyle 0 border-colour)
       (.beginFill full-colour)
-      (.drawRect 0 0 1024 1024)
+      (.drawRect 0 0 8192 8192)
       .endFill)))
 
 (defn print-gl-version []
@@ -106,10 +110,10 @@
   (set! (.-filters texture) (make-array filter)))
 
 (defn plot [data x y r g]
-  (aset data (+ 0 (* 4 x) (* y 64 4)) r)
-  (aset data (+ 1 (* 4 x) (* y 64 4)) g)
-  (aset data (+ 2 (* 4 x) (* y 64 4)) 0)
-  (aset data (+ 3 (* 4 x) (* y 64 4)) 255)
+  (aset data (+ 0 (* 4 x) (* y 1024 4)) r)
+  (aset data (+ 1 (* 4 x) (* y 1024 4)) g)
+  (aset data (+ 2 (* 4 x) (* y 1024 4)) 0)
+  (aset data (+ 3 (* 4 x) (* y 1024 4)) 255)
   )
 
 (defn room [data x y w h]
@@ -150,18 +154,20 @@
   )
 
 (defn make-map-image []
-  (let [height 64
-        width 64
+  (let [height 1024
+        width 1024
         data (make-array Uint8 (* 4 width height))
         ]
     (js/console.log data)
-    (room data 0 0 12 7)
-    (room data 13 0 5 12)
-    (room data 0 8 4 4)
-    (room data 5 8 7 10)
-    (room data 0 13 4 10)
+    (dotimes [n 10000]
+      (room data
+            (int (* 1000 (rand)))
+            (int (* 1000 (rand)))
+            (int (+ 4 (* 30 (rand))))
+            (int (+ 4 (* 30 (rand))))
+            ))
 
-    (js/PIXI.Texture.fromBuffer (js/Uint8Array. data) 64 64)
+    (js/PIXI.Texture.fromBuffer (js/Uint8Array. data) 1024 1024)
     )
   )
 
@@ -176,12 +182,20 @@
           shader (make-shader texture)]
       (c/with-sprite canvas :tilemap
 
-        [;;tiles (s/make-sprite (r/get-texture :tiles :nearest))
+        [ ;;tiles (s/make-sprite (r/get-texture :tiles :nearest))
          ;;map-obj (s/make-sprite texture)
          bg (make-backg)
          ]
-        (s/set-pos! bg -256 -256)
+        (s/set-pos! bg -4096 -4096)
         (set-texture-filter bg shader)
 
-        (while true
-          (<! (timeout 1000)))))))
+        (loop [t 0]
+          (set-uniform shader "scroll" (clj->js
+                                        [
+                                         (int (* 32000 (+ 0.5 (/ (Math/sin (* 2 0.00128 t)) 2))))
+                                         (int (* 32000 (+ 0.5 (/ (Math/sin (* 0.0006 t)) 2))))
+                                         ]))
+          (set-uniform shader "fragsize" #js [(.-innerWidth js/window)
+                                              (.-innerHeight js/window)])
+          (<! (e/next-frame))
+          (recur (inc t)))))))
