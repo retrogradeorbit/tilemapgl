@@ -134,7 +134,7 @@
         width 1024
         data (make-array Uint8 (* 4 width height))
         ]
-    ;; 10000 random frames
+    ;; 10000 random room frames
     (dotimes [n 10000]
       (room data
             (int (* 1000 (rand)))
