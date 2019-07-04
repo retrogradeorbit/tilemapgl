@@ -55,7 +55,7 @@
   (let [shader (js/PIXI.Filter.
                 nil
                 fragment-shader)]
-    (set-uniform shader "mapsize" #js [1024. 1024.])
+    (set-uniform shader "mapsize" #js [512. 512.])
     (set-uniform shader "tilesheetsize" #js [448. 320.])
     (set-uniform shader "fragsize" #js [(.-innerWidth js/window)
                                         (.-innerHeight js/window)])
@@ -90,10 +90,10 @@
   (set! (.-filters texture) (make-array filter)))
 
 (defn plot [data x y r g]
-  (aset data (+ 0 (* 4 x) (* y 1024 4)) r)
-  (aset data (+ 1 (* 4 x) (* y 1024 4)) g)
-  (aset data (+ 2 (* 4 x) (* y 1024 4)) 0)
-  (aset data (+ 3 (* 4 x) (* y 1024 4)) 255)
+  (aset data (+ 0 (* 4 x) (* y 512 4)) r)
+  (aset data (+ 1 (* 4 x) (* y 512 4)) g)
+  (aset data (+ 2 (* 4 x) (* y 512 4)) 0)
+  (aset data (+ 3 (* 4 x) (* y 512 4)) 255)
   )
 
 (defn room [data x y w h]
@@ -130,20 +130,20 @@
   (plot data (+ w x) (+ 3 y) 0 9))
 
 (defn make-map-image []
-  (let [height 1024
-        width 1024
+  (let [height 512
+        width 512
         data (make-array Uint8 (* 4 width height))
         ]
-    ;; 10000 random room frames
-    (dotimes [n 10000]
+    ;; 2500 random room frames
+    (dotimes [n 2500]
       (room data
-            (int (* 1000 (rand)))
-            (int (* 1000 (rand)))
+            (int (* 500 (rand)))
+            (int (* 500 (rand)))
             (int (+ 4 (* 30 (rand))))
             (int (+ 4 (* 30 (rand))))))
 
     ;; transfer to gfx ram
-    (js/PIXI.Texture.fromBuffer (js/Uint8Array. data) 1024 1024)))
+    (js/PIXI.Texture.fromBuffer (js/Uint8Array. data) 512 512)))
 
 (defonce main
   (go
@@ -159,8 +159,8 @@
         (loop [t 0]
           (set-uniform shader "scroll" (clj->js
                                         [
-                                         (int (* 32000 (+ 0.5 (/ (Math/sin (* 0.00128 t)) 2))))
-                                         (int (* 32000 (+ 0.5 (/ (Math/sin (* 0.0006 t)) 2))))
+                                         (int (* 16000 (+ 0.5 (/ (Math/sin (* 2 0.00128 t)) 2))))
+                                         (int (* 16000 (+ 0.5 (/ (Math/sin (* 2 0.0006 t)) 2))))
                                          ]))
           (set-uniform shader "fragsize" #js [(.-innerWidth js/window)
                                               (.-innerHeight js/window)])
