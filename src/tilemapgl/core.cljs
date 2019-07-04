@@ -17,26 +17,8 @@
            :translate {:stats [40 -40]
                        :title [0 40]}}))
 
-(def vertex-shader
-  "#version 300 es
-  in vec2 aVertexPosition;
-  in vec2 aTextureCoord;
-
-  uniform mat3 projectionMatrix;
-
-  out vec2 vTextureCoord;
-
-  void main(void){
-     gl_Position = vec4((projectionMatrix * vec3(aVertexPosition, 1.0)).xy, 0.0, 1.0);
-     //gl_Position = vec4(aVertexPosition, 0.0, 1.0);
-
-     vTextureCoord = aTextureCoord;
-  }"
-  )
-
 (def fragment-shader
-  "#version 300 es
-  precision mediump float;
+  "precision mediump float;
 
   uniform sampler2D map;
   uniform sampler2D tiles;
@@ -46,14 +28,12 @@
   uniform vec2 mapsize;
   uniform vec2 tilesheetsize;
 
-  in vec2 vTextureCoord;
-
-  out vec4 diffuseColor;
+  varying vec2 vTextureCoord;
 
   void main() {
     vec2 fragpixelpos = vTextureCoord*fragsize+scroll;
     vec2 tilepixelpos = floor(fragpixelpos)/mapsize;
-    vec4 tile = texture(map, tilepixelpos/tilesize);
+    vec4 tile = texture2D(map, tilepixelpos/tilesize);
 
     // if map pixel has alpha of 0, render nothing
     if(tile.a == 0.0) { discard;}
@@ -61,10 +41,10 @@
     // tile location on sprite sheet
     vec2 tileoffset = tile.xy * 255. * tilesize;
 
-    // tile pixel location on sprite sheet
+    // tile pixel location on sprite sheet *inside* the tile we are on
     vec2 innercoord = mod(fragpixelpos, tilesize);
 
-    diffuseColor = texture(tiles,  (tileoffset + innercoord)/tilesheetsize);
+    gl_FragColor = texture2D(tiles,  (tileoffset + innercoord)/tilesheetsize);
   }
 ")
 
@@ -73,7 +53,7 @@
 
 (defn make-shader [texture]
   (let [shader (js/PIXI.Filter.
-                vertex-shader
+                nil
                 fragment-shader)]
     (set-uniform shader "mapsize" #js [1024. 1024.])
     (set-uniform shader "tilesheetsize" #js [448. 320.])
@@ -147,45 +127,32 @@
 
   (plot data (+ w x) (+ 1 y) 0 7)
   (plot data (+ w x) (+ 2 y) 0 8)
-  (plot data (+ w x) (+ 3 y) 0 9)
-
-
-
-  )
+  (plot data (+ w x) (+ 3 y) 0 9))
 
 (defn make-map-image []
   (let [height 1024
         width 1024
         data (make-array Uint8 (* 4 width height))
         ]
-    (js/console.log data)
+    ;; 10000 random frames
     (dotimes [n 10000]
       (room data
             (int (* 1000 (rand)))
             (int (* 1000 (rand)))
             (int (+ 4 (* 30 (rand))))
-            (int (+ 4 (* 30 (rand))))
-            ))
+            (int (+ 4 (* 30 (rand))))))
 
-    (js/PIXI.Texture.fromBuffer (js/Uint8Array. data) 1024 1024)
-    )
-  )
-
+    ;; transfer to gfx ram
+    (js/PIXI.Texture.fromBuffer (js/Uint8Array. data) 1024 1024)))
 
 (defonce main
   (go
-    (print-gl-version)
-
-    (<! (r/load-resources canvas :ui ["img/tiles.png" "img/map.png"]))
+    (<! (r/load-resources canvas :ui ["img/tiles.png"]))
 
     (let [texture (make-map-image)
           shader (make-shader texture)]
       (c/with-sprite canvas :tilemap
-
-        [ ;;tiles (s/make-sprite (r/get-texture :tiles :nearest))
-         ;;map-obj (s/make-sprite texture)
-         bg (make-backg)
-         ]
+        [bg (make-backg)]
         (s/set-pos! bg -4096 -4096)
         (set-texture-filter bg shader)
 
