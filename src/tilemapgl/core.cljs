@@ -159,7 +159,7 @@
         (loop [t 0]
           (set-uniform shader "scroll" (clj->js
                                         [
-                                         (int (* 32000 (+ 0.5 (/ (Math/sin (* 2 0.00128 t)) 2))))
+                                         (int (* 32000 (+ 0.5 (/ (Math/sin (* 0.00128 t)) 2))))
                                          (int (* 32000 (+ 0.5 (/ (Math/sin (* 0.0006 t)) 2))))
                                          ]))
           (set-uniform shader "fragsize" #js [(.-innerWidth js/window)
