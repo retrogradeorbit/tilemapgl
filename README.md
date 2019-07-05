@@ -1,14 +1,27 @@
 # tilemapgl
 
-WIP: build a high speed retro tilemap game engine in clojurescripte based on a sole fragment shader
+A high speed retro tilemap game engine in clojurescript based on a sole fragment shader.
 
 [TRY IT NOW!](https://retrogradeorbit.github.io/tilemapgl/)
 
 ## Overview
 
-Make a super fast, super large tilemap, rendered soley on the GPU. Intended for use with infinitelives and to be used in gamejams.
+ * fast
+ * large tilemap
+ * rendered soley on the GPU
+ * uses infinitelives.pixi
 
 ## Setup
+
+Install infinitelives.utils
+
+  * checkout infinitelives.utils repo
+  * `lein install` inside the project
+
+Install infinitelives.pixi
+
+  * checkout infinitelives.pixi repo
+  * `lein install` inside the project
 
 To get an interactive development environment run:
 
