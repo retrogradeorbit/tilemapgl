@@ -227,6 +227,7 @@ var PIXI = {
   "GraphicsData": function () {},
   "GraphicsRenderer": function () {},
   "Texture": {
+    "fromBuffer": function () {},
     "fromImage": function () {},
     "fromFrame": function () {},
     "fromCanvas": function () {},

@@ -29,6 +29,9 @@ $(CSS): resources/public/css/style.css
 $(APP): src/**/** project.clj
 	rm -f $(APP)
 	lein cljsbuild once min
+	cp build/js/compiled/tilemapgl.js build/js/compiled/tilemapgl.orig.js
+	uglify -s build/js/compiled/tilemapgl.orig.js -o build/js/compiled/tilemapgl.js
+	rm build/js/compiled/tilemapgl.orig.js
 
 $(IDX): resources/public/index.html
 	cp $< $@
