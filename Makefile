@@ -12,6 +12,7 @@ MUSIC_SOURCE_MP3S=$(subst .ogg,.mp3,$(MUSIC_SOURCE))
 MUSIC=$(subst resources/public,build,$(MUSIC_SOURCE)) $(subst resources/public,build,$(MUSIC_SOURCE_MP3S))
 ME=$(shell basename $(shell pwd))
 REPO=git@github.com:retrogradeorbit/tilemapgl.git
+ELECTRON_PACKAGER=node ~/dev/node_modules/.bin/electron-packager
 
 all: $(SFX_OGGS) $(SFX_MP3S) $(APP) $(CSS) $(IDX) $(IMG) $(SFX) $(MUSIC)
 
@@ -71,3 +72,7 @@ checkouts:
 	mkdir checkouts
 	cd checkouts/ && ln -s ../../infinitelives.pixi
 	cd checkouts/ && ln -s ../../infinitelives.utils
+
+electron: all
+	cp electron/* build
+	cd build && $(ELECTRON_PACKAGER) . tilemapgl --electron-version=5.0.6 --all
