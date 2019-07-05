@@ -23,8 +23,8 @@
   :cljsbuild {:builds
               [{:id "dev"
                 :source-paths ["src"
-                               "checkouts/infinitelives.utils/src"
-                               "checkouts/infinitelives.pixi/src"
+;;                               "checkouts/infinitelives.utils/src"
+;;                               "checkouts/infinitelives.pixi/src"
                                ]
 
                 ;; The presence of a :figwheel configuration here
